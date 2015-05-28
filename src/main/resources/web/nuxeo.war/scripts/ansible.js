@@ -1,7 +1,6 @@
 // Add Ansible notifications
 
 jQuery(window).ready( function() {
-	
 	// localhost:8080
 	var domain = jQuery(location).attr('host');
 	
@@ -20,9 +19,20 @@ jQuery(window).ready( function() {
 	});
 });
 
+function isSubArray (subArray, array) {
+    for(var i = 0 , len = subArray.length; i < len; i++) {
+        if(jQuery.inArray(subArray[i], array) == -1) return false;
+    }
+    return true;
+}
+
 function ansibleResponse(data) {
 	if(data['html'] != ""){
 	jQuery(window).ready( function() {
+		if(localStorage.getItem('dismissedNotices') !== null)
+			if(isSubArray(data['id'],JSON.parse(localStorage.getItem('dismissedNotices'))))
+				return;	
+		
 		jQuery('body').append('<div class="cd-popup" role="alert">'+
                 '<div class="cd-popup-container">'+
                 data['html']+
@@ -160,6 +170,10 @@ function ansibleResponse(data) {
 		if( jQuery(event.target).is('.cd-popup-close') || jQuery(event.target).is('.cd-popup') ) {
 			event.preventDefault();
 			jQuery(this).removeClass('is-visible');
+			if(localStorage.getItem('dismissedNotices') !== null)
+				localStorage.setItem('dismissedNotices', JSON.stringify(JSON.parse(localStorage.getItem('dismissedNotices')).concat(data['id'])))
+			else
+				localStorage.setItem('dismissedNotices',JSON.stringify(data['id']))
 		}
 	});
 	//close popup when clicking the esc keyboard button
